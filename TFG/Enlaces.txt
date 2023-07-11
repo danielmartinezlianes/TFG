@@ -1,0 +1,8 @@
+http://games.stanford.edu/games/gdl.html
+https://kcir.pwr.edu.pl/~witold/ai/CLIPS_tutorial/CLIPS_tutorial_6.html
+https://github.com/m00natic/clips-chess
+
+https://www.redeszone.net/2014/09/26/rosetta-code-traduce-de-un-lenguaje-de-programacion-otro/
+https://blog.facialix.com/facebook-ha-anunciado-transcoder-una-herramienta-para-traducir-codigo-de-programacion/
+https://es.quora.com/Existe-alg%C3%BAn-traductor-de-lenguajes-de-programaci%C3%B3n
+https://mundowin.com/use-estos-2-compiladores-para-traducir-cualquier-codigo-de-lenguaje-de-programacion/

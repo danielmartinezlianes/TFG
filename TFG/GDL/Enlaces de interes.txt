@@ -1,0 +1,7 @@
+http://alloyggp.blogspot.com/2012/12/the-game-description-language.html
+http://www.ggp.org/developers/games.html
+http://ggp.stanford.edu/ggp/notes/gdl.html
+https://en.wikipedia.org/wiki/Game_Description_Language#:~:text=Game%20Description%20Language%2C%20or%20GDL,game%20mechanics%20as%20logical%20rules.
+https://www.cse.unsw.edu.au/~mit/Papers/AAAI10a.pdf
+https://www.ijcai.org/proceedings/2017/0177.pdf
+https://www.irit.fr/agape/wp-content/uploads/2019/08/tutorialIJCAI19GJLP.pdf
