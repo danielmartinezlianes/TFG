@@ -16,7 +16,8 @@ def CreaClases(f_salida):
     )
 
 (defclass tablero
-	    (is-a USER)
+	    (is-a USER (type SYMBOL))
+        (slot Nombre (type SYMBOL))
 	    (slot x (type INTEGER))
 	    (slot y (type INTEGER))
 	    (slot estado (type SYMBOL))
@@ -39,16 +40,21 @@ def TraduceInstancias(f_salida,f_entrada):
         f.write("(definstances estado-inicial \n");
         while line:
             line = file.readline();
-
-            if ("init(control(" in line):
+            word=str(line).split()
+            if ('(init' in word and '(control' in word):
                 {
                     f.write("   (of turno (Nombre " + str(line[line.find("(") +9 :line.find(")")]) + "))\n")
                 }
-            elif("init" in line): {
-                    f.write("   (of tablero (x "+str(line[line.find("(") + 1:line.find(",")]) +") (y "+ str(line[line.find(",") + 1:line.rfind(",")])+") (estado "+str(line[line.rfind(",")+1:line.rfind(")")])+ "))\n")
-
+            elif ('(init' in word and '(control' not in word and len(word)>=5):
+                {
+                f.write("   (of tablero (Nombre "+word[1].replace('(','') +")"+ "(x "+word[2]+")"+"(y "+word[3]+")"+"(estado "+word[4].replace(')','')+")"+"\n")
                 }
-            elif("role" in line):{f.write("   (of jugador (Nombre " + str(line[line.find("(")+1  :line.find(")")]) + "))\n")}
+                    
+                    
+
+                
+            #(x "+ str(line[line.find(" ") + 1:line.rfind(" ")])+") (y "+ str(line[line.find(" ") + 1:line.rfind(" ")])+") (estado "+str(line[line.rfind(" ")+1:line.rfind(")")])+ "))
+            #elif("role" in line):{f.write("   (of jugador (Nombre " + str(line[line.find("(")+1  :line.find(")")]) + "))\n")}
         f.write(")");
         f.close
 
