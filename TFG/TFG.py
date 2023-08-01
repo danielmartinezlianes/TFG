@@ -16,7 +16,7 @@ def CreaClases(f_salida):
     )
 
 (defclass tablero
-	    (is-a USER (type SYMBOL))
+	    (is-a USER)
         (slot Nombre (type SYMBOL))
 	    (slot x (type INTEGER))
 	    (slot y (type INTEGER))
@@ -43,13 +43,16 @@ def TraduceInstancias(f_salida,f_entrada):
             word=str(line).split()
             if ('(init' in word and '(control' in word):
                 {
-                    f.write("   (of turno (Nombre " + str(line[line.find("(") +9 :line.find(")")]) + "))\n")
+                    f.write("   (of turno (Nombre " + word[2].replace(')','')+"))\n")
                 }
             elif ('(init' in word and '(control' not in word and len(word)>=5):
                 {
-                f.write("   (of tablero (Nombre "+word[1].replace('(','') +")"+ "(x "+word[2]+")"+"(y "+word[3]+")"+"(estado "+word[4].replace(')','')+")"+"\n")
+                f.write("   (of tablero (Nombre "+word[1].replace('(','') +")"+ "(x "+word[2]+")"+"(y "+word[3]+")"+"(estado "+word[4].replace(')','')+"))"+"\n")
                 }
-                    
+            if ('(role' in word ):
+                {
+                    f.write("   (of jugador (Nombre " + word[1].replace(')','')+"))\n")
+                }     
                     
 
                 
