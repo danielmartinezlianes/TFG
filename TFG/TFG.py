@@ -5,7 +5,7 @@ def Main():
     print("Introduce la ruta del fichero a traducir: ")
     f_entrada= input()
     TraduceInstancias(f_salida,f_entrada)
-    #TraduceReglas(f_salida,f_entrada)
+    TraduceReglas(f_salida,f_entrada)
     print('El fichero se ha generado en la ruta '+f_salida)
 
 def CreaClases(f_salida):
@@ -36,10 +36,9 @@ def TraduceInstancias(f_salida,f_entrada):
     with open( f_entrada, 'r') as file:
         f = open(f_salida+"\\resultado.clp", "a")
         line = file.readline()
-        to_search = "role(x)"
         f.write("(definstances estado-inicial \n");
         while line:
-            line = file.readline();
+            
             word=str(line).split()
             if ('(init' in word and '(control' in word):
                 {
@@ -53,14 +52,25 @@ def TraduceInstancias(f_salida,f_entrada):
                 {
                     f.write("   (of jugador (Nombre " + word[1].replace(')','')+"))\n")
                 }     
-                    
-
-                
-            #(x "+ str(line[line.find(" ") + 1:line.rfind(" ")])+") (y "+ str(line[line.find(" ") + 1:line.rfind(" ")])+") (estado "+str(line[line.rfind(" ")+1:line.rfind(")")])+ "))
-            #elif("role" in line):{f.write("   (of jugador (Nombre " + str(line[line.find("(")+1  :line.find(")")]) + "))\n")}
+            line = file.readline();
         f.write(")");
         f.close
 
-
+def TraduceReglas(f_salida,f_entrada):
+    with open( f_entrada, 'r') as file:
+        f = open(f_salida+"\\resultado.clp", "a")
+        line = file.readline()
+        word=str(line).split()
+        while line:
+            
+            word=str(line).split()
+            if ('(<=' in word and '(legal' in word):
+                
+                    f.write("\n(defrule inicio\n ?d <- (object (is-a jugador) (Nombre "+word[2]+"))\n")
+                    line = file.readline();
+                    word2=str(line).split()
+                    f.write(" ?ag <- (object (is-a tablero) (Nombre "+word2[1].replace('(','')+")(x ?x)(y ?y)(estado "+word2[4].replace(')','')+"))\n=>\n(modify ?ag (estado "+word[2]+")))\n")
+            line = file.readline();    
+        f.close
 
 Main()
