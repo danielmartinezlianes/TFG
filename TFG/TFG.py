@@ -1,3 +1,5 @@
+import string
+
 def Main():
     print('Introduce la ruta en la que se generara el archivo resultado: ')
     f_salida= input()
@@ -63,6 +65,7 @@ def TraduceReglas(f_salida,f_entrada):
         word=str(line).split()
         array=list()
         acciones=1
+        goal=1
         while line:
             does=0
             word=str(line).split()
@@ -100,6 +103,45 @@ def TraduceReglas(f_salida,f_entrada):
                     array.clear()
                 else:
                     print("hola")
+
+            elif('(<=' in word and '(goal' not in word and 'terminal' not in word and '(legal' not in word):
+                fact=line
+                line = file.readline();
+                abecedario_minusculas = list(string.ascii_lowercase)
+                
+                
+                contador=0
+                condiciones=""
+                while(line!="\n" and line!=")\n" and len(line) != 0):
+                    contador+=1
+                    word=str(line).split()
+                    if('(true' in word):
+                        line='?'+abecedario_minusculas[contador]+' <- '+line+''
+                        condiciones=condiciones+line.replace('(true ','').replace(')','').replace('\n','')+")\n"
+                    
+                    line = file.readline();
+                if(condiciones!=""):
+                    f.write("\n(defrule accion"+str(acciones)+"\n")
+                    f.write(condiciones)
+                    f.write("=>\n(assert "+fact.replace('(<= ','')+"))\n")
+                    acciones+=1
+            elif ('(<=' in word and '(goal' in word):
+                fact=line
+                line = file.readline();
+                
+                f.write("\n(defrule goal"+str(goal)+"\n")
+                goal+=1
+                while(line!="\n" and line!=")\n" and len(line) != 0):
+                    contador+=1
+                    word=str(line).split()
+                    if('(not' not in word):
+                        line='?a <- '+line+''
+                        f.write(line.replace(')','').replace('\n','')+")\n")
+                    else:
+                        f.write(line.replace(')','').replace('\n','')+"))\n")
+                    line = file.readline();
+                f.write("=>\n(assert "+fact.replace('(<= ','')+"))\n")
+            
             else:
                 line = file.readline();
         f.close
@@ -108,6 +150,8 @@ def TraduceReglas(f_salida,f_entrada):
 
 Main()
 
+
+  
 
 
 
