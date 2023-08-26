@@ -151,4 +151,10 @@ def TraduceReglas(f_salida,f_entrada):
 Main()
 
 
-  
+
+
+#f.write("\n(defrule inicio\n ?d <- (object (is-a jugador) (Nombre "+word[2]+"))\n")
+                    #line = file.readline();
+                    #word2=str(line).split()
+                    #f.write(" ?ag <- (object (is-a tablero) (Nombre "+word2[1].replace('(','')+")(x ?x)(y ?y)(estado "+word2[len(word2)-1].replace(')','')+"))\n=>\n(modify ?ag (estado "+word[2]+")))\n")
+              #line = file.readline();    
