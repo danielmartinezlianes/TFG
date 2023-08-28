@@ -1,0 +1,309 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Tiger vs Dogs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Roles
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (role tplayer)
+  (role dplayer)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Initial State
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (init (cell 1 1 d))
+  (init (cell 1 2 d))
+  (init (cell 1 3 d))
+  (init (cell 1 4 d))
+  (init (cell 1 5 d))
+  (init (cell 2 1 d))
+  (init (cell 2 2 b))
+  (init (cell 2 3 b))
+  (init (cell 2 4 b))
+  (init (cell 2 5 d))
+  (init (cell 3 1 d))
+  (init (cell 3 2 b))
+  (init (cell 3 3 t))
+  (init (cell 3 4 b))
+  (init (cell 3 5 d))
+  (init (cell 4 1 d))
+  (init (cell 4 2 b))
+  (init (cell 4 3 b))
+  (init (cell 4 4 b))
+  (init (cell 4 5 d))
+  (init (cell 5 1 d))
+  (init (cell 5 2 d))
+  (init (cell 5 3 d))
+  (init (cell 5 4 d))
+  (init (cell 5 5 d))
+  
+  (init (control tplayer))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Static increments
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(incr 1 2)
+(incr 2 3)
+(incr 3 4)
+(incr 4 5)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Legal moves
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;it is legal for tplayer to move if there is a blank (b) incremental cell available
+(<= (legal tplayer (move ?x1 ?y1 ?x2 ?y2))
+    (true (cell ?x2 ?y2 b))
+    (true (cell ?x1 ?y1 t))
+    (true (control tplayer))
+    (or (distinct ?x1 ?x2)
+        (distinct ?y1 ?y2))
+    (or (incr ?x1 ?x2)
+        (incr ?x2 ?x1)
+        (not (distinct ?x1 ?x2)))
+    (or (incr ?y1 ?y2)
+        (incr ?y2 ?y1)
+        (not (distinct ?y1 ?y2))))
+
+;;it is legal for dplayer to move if there is a blank (b) incremental cell available
+(<= (legal dplayer (move ?x1 ?y1 ?x2 ?y2))
+    (true (cell ?x2 ?y2 b))
+    (true (cell ?x1 ?y1 d))
+    (true (control dplayer))
+    (or (distinct ?x1 ?x2)
+        (distinct ?y1 ?y2))
+    (or (incr ?x1 ?x2)
+        (incr ?x2 ?x1)
+        (not (distinct ?x1 ?x2)))
+    (or (incr ?y1 ?y2)
+        (incr ?y2 ?y1)
+        (not (distinct ?y1 ?y2))))
+
+;;if it is not their turn they can perform no operation
+(<= (legal tplayer noop)
+    (true (control dplayer)))
+(<= (legal dplayer noop)
+    (true (control tplayer)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; State info
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; check if player ?p is on top of ?x ?y
+(<= (top ?x ?y ?p)
+    (true (cell ?x2 ?y ?p))
+    (incr ?x2 ?x))
+
+;; check if player ?p is under ?x ?y
+(<= (bottom ?x ?y ?p)
+    (true (cell ?x2 ?y ?p))
+    (incr ?x ?x2))
+
+;; check if player ?p is left of ?x ?y
+(<= (left ?x ?y ?p)
+    (true (cell ?x ?y2 ?p))
+    (incr ?y2 ?y))
+
+;; check if player ?p is right of ?x ?y
+(<= (right ?x ?y ?p)
+    (true (cell ?x ?y2 ?p))
+    (incr ?y ?y2))
+
+;; check if player ?p is on top left of ?x ?y
+(<= (topleft ?x ?y ?p)
+    (true (cell ?x2 ?y2 ?p))
+    (incr ?x2 ?x)
+    (incr ?y2 ?y))
+
+;; check if player ?p is on top right of ?x ?y
+(<= (topright ?x ?y ?p)
+    (true (cell ?x2 ?y2 ?p))
+    (incr ?x2 ?x)
+    (incr ?y ?y2))
+
+;; check if player ?p is on bottom left of ?x ?y
+(<= (bottomleft ?x ?y ?p)
+    (true (cell ?x2 ?y2 ?p))
+    (incr ?x ?x2)
+    (incr ?y2 ?y))
+
+;; check if player ?p is on bottom right of ?x ?y
+(<= (bottomright ?x ?y ?p)
+    (true (cell ?x2 ?y2 ?p))
+    (incr ?x ?x2)
+    (incr ?y ?y2))
+
+;; when a dog-tiger-dog line has been formed in any direction the dog is killed
+;; assuming there are no more than 1 dog on either side
+(<= (killed ?x1 ?y1 ?x2 ?y2)
+    (or (leftDiagKill ?x1 ?y1 ?x2 ?y2)
+        (rightDiagKill ?x1 ?y1 ?x2 ?y2)
+        (verticalKill ?x1 ?y1 ?x2 ?y2)
+        (horizontalKill ?x1 ?y1 ?x2 ?y2)))
+
+;;dogs at x1 y1 and x2 y2 are killed
+(<= (leftDiagKill ?x1 ?y1 ?x2 ?y2)
+     (true (cell ?x1 ?y1 d))
+     (true (cell ?x2 ?y2 d))
+;; if no dog is to the top left of dog 1
+    (not (topleft ?x1 ?y1 d))
+;;and the tiger is to the bottom right
+    (bottomright ?x1 ?y1 t)
+;; if no dog is to the bottom righ of dog 2
+    (not (bottomright ?x2 ?y2 d))
+;;and the tiger is to the top left
+    (topleft ?x2 ?y2 t))
+
+;;dogs at x1 y1 and x2 y2 are killed
+(<= (rightDiagKill ?x1 ?y1 ?x2 ?y2)
+     (true (cell ?x1 ?y1 d))
+     (true (cell ?x2 ?y2 d))
+;; if no dog is to the top left of dog 1
+    (not (topright ?x1 ?y1 d))
+;;and the tiger is to the bottom right
+    (bottomleft ?x1 ?y1 t)
+;; if no dog is to the bottom righ of dog 2
+    (not (bottomleft ?x2 ?y2 d))
+;;and the tiger is to the top left
+    (topright ?x2 ?y2 t))
+
+;;dogs at x1 y1 and x2 y2 are killed
+(<= (verticalKill ?x1 ?y1 ?x2 ?y2)
+     (true (cell ?x1 ?y1 d))
+     (true (cell ?x2 ?y2 d))
+;; if no dog is to the top left of dog 1
+    (not (top ?x1 ?y1 d))
+;;and the tiger is to the bottom right
+    (bottom ?x1 ?y1 t)
+;; if no dog is to the bottom righ of dog 2
+    (not (bottom ?x2 ?y2 d))
+;;and the tiger is to the top left
+    (top ?x2 ?y2 t))
+
+;;dogs at x1 y1 and x2 y2 are killed
+(<= (horizontalKill ?x1 ?y1 ?x2 ?y2)
+     (true (cell ?x1 ?y1 d))
+     (true (cell ?x2 ?y2 d))
+;; if no dog is to the top left of dog 1
+    (not (left ?x1 ?y1 d))
+;;and the tiger is to the bottom right
+    (right ?x1 ?y1 t)
+;; if no dog is to the bottom righ of dog 2
+    (not (right ?x2 ?y2 d))
+;;and the tiger is to the top left
+    (left ?x2 ?y2 t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; State transitions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(<= (distinctCell ?x1 ?y1 ?x2 ?y2)
+    (distinct ?x1 ?x2))
+(<= (distinctCell ?x1 ?y1 ?x2 ?y2)
+    (distinct ?y1 ?y2))
+
+;; when the tiger moves make the new position t
+(<= (next (cell ?x2 ?y2 t))
+    (does tplayer (move ?x1 ?y1 ?x2 ?y2)))
+
+;; when the tiger moves make the old position b
+(<= (next (cell ?x1 ?y1 b))
+    (does tplayer (move ?x1 ?y1 ?x2 ?y2)))
+
+;; when the dog moves make the new position d
+(<= (next (cell ?x2 ?y2 d))
+    (does dplayer (move ?x1 ?y1 ?x2 ?y2)))
+
+;; when the dog moves make the old position b
+(<= (next (cell ?x1 ?y1 b))
+    (does dplayer (move ?x1 ?y1 ?x2 ?y2)))
+
+;;continue cells to the next state
+(<= (next (cell ?x ?y ?s))
+    (true (cell ?x ?y ?s))
+    (does ?p (move ?x1 ?y1 ?x2 ?y2))
+;;make sure the dog wasnt killed
+    (not (killed ?x ?y ?x3 ?y3))
+    (not (killed ?x3 ?y3 ?x ?y))
+    (distinctCell ?x1 ?y1 ?x ?y)
+    (distinctCell ?x2 ?y2 ?x ?y))
+
+;;if dog was killed set it to b
+(<= (next (cell ?x1 ?y1 b))
+    (killed ?x1 ?y1 ?x2 ?y2))
+
+;;if dog was killed set it to b
+(<= (next (cell ?x2 ?y2 b))
+    (killed ?x1 ?y1 ?x2 ?y2))
+
+(<= (next (twoDogsKilled))
+    (killed ?x1 ?y1 ?x2 ?y2)
+    (not  (true (twoDogsKilled)))
+    (not  (true (fourDogsKilled))))
+
+(<= (next (fourDogsKilled))
+    (killed ?x1 ?y1 ?x2 ?y2)
+    (true (twoDogsKilled))
+    (not  (true (fourDogsKilled))))
+
+(<= (next (sixDogsKilled))
+    (killed ?x1 ?y1 ?x2 ?y2)
+    (true (fourDogsKilled)))
+    
+(<= (next (twoDogsKilled))
+    (not (killed ?x1 ?y1 ?x2 ?y2))
+    (true (twoDogsKilled)))
+
+(<= (next (fourDogsKilled))
+    (not (killed ?x1 ?y1 ?x2 ?y2))
+    (true (fourDogsKilled)))
+
+(<= (next (sixDogsKilled))
+    (not (killed ?x1 ?y1 ?x2 ?y2))
+    (true (sixDogsKilled)))
+
+;;swap control over to opponent
+(<= (next (control dplayer))
+    (true (control tplayer)))
+(<= (next (control tplayer))
+    (true (control dplayer)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Terminal conditions
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; when the tiger cant move because it is captured
+(<= (captured)
+    (true (control tplayer))
+    (not (legal tplayer (move ?x1 ?y1 ?x2 ?y2))))
+
+(<= terminal (captured))
+(<= terminal (true (sixDogsKilled)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Utilities
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; tplayer gets 100 if 6 dogs are killed
+(<= (goal tplayer 100)
+    (true (sixDogsKilled)))
+;; tplayer gets 50 if game ends when it isnt captured
+(<= (goal tplayer 50)
+    (not (captured)))
+;; tplayer gets 0 if tiger is captured
+(<= (goal tplayer 0)
+    (captured))
+;; tplayer gets 100 if tiger is captured
+(<= (goal dplayer 100)
+    (captured))
+;; tplayer gets 50 if game ends when tiger isnt captured
+(<= (goal dplayer 50)
+    (not (captured)))
+;; tplayer gets 0 if 6 dogs are killed
+(<= (goal dplayer 0)
+    (true (sixDogsKilled)))

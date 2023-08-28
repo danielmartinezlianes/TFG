@@ -1,30 +1,110 @@
-Roles
+# Define los roles de los jugadores como 'x' y 'o'
+(role x)
+(role o)
 
-role(x)
-role(o)
+# Define el estado inicial del tablero, todas las celdas vacías ('b')
+(init (cell 1 1 b))
+(init (cell 1 2 b))
+(init (cell 1 3 b))
+(init (cell 2 1 b))
+(init (cell 2 2 b))
+(init (cell 2 3 b))
+(init (cell 3 1 b))
+(init (cell 3 2 b))
+(init (cell 3 3 b))
 
-Estado inicial
+# Define las acciones legales que un jugador puede realizar: marcar una celda vacía
+(<= (legal x (mark ?row ?col))
+    (true (cell ?row ?col b)))
 
-init(1,1,b)
-init(1,2,b)
-init(1,3,b)
-init(2,1,b)
-init(2,2,b)
-init(2,3,b)
-init(3,1,b)
-init(3,2,b)
-init(3,3,b)
+(<= (legal o (mark ?row ?col))
+    (true (cell ?row ?col b)))
 
-init(control(x))
+# Define la transición del estado del tablero después de que un jugador hace una jugada
+(<= (next (cell ?row ?col x))
+    (does x (mark ?row ?col))
+    (true (cell ?row ?col b)))
 
-Acciones
+(<= (next (cell ?row ?col o))
+    (does o (mark ?row ?col))
+    (true (cell ?row ?col b)))
 
-(<= (legal ?w (mark ?x ?y))
-(true (cell ?x ?y b))
-(true (control ?w)))
+# Define reglas para determinar si una fila, columna o diagonal está completa para un jugador
+(<= (row-complete ?row ?player)
+    (true (cell ?row 1 ?player))
+    (true (cell ?row 2 ?player))
+    (true (cell ?row 3 ?player)))
 
-(<= (legal x noop)
-(true (control o)))
+(<= (col-complete ?col ?player)
+    (true (cell 1 ?col ?player))
+    (true (cell 2 ?col ?player))
+    (true (cell 3 ?col ?player)))
 
-<= (legal o noop)
-(true (control x)))
+(<= (diagonal1-complete ?player)
+    (true (cell 1 1 ?player))
+    (true (cell 2 2 ?player))
+    (true (cell 3 3 ?player)))
+
+(<= (diagonal2-complete ?player)
+    (true (cell 1 3 ?player))
+    (true (cell 2 2 ?player))
+    (true (cell 3 1 ?player)))
+
+# Define reglas para determinar si un jugador ha ganado en una fila, columna o diagonal
+(<= (row-win x)
+    (row-complete ?row x))
+
+(<= (row-win o)
+    (row-complete ?row o))
+
+(<= (col-win x)
+    (col-complete ?col x))
+
+(<= (col-win o)
+    (col-complete ?col o))
+
+(<= (diagonal-win x)
+    (diagonal1-complete x))
+
+(<= (diagonal-win o)
+    (diagonal1-complete o))
+
+(<= (diagonal-win x)
+    (diagonal2-complete x))
+
+(<= (diagonal-win o)
+    (diagonal2-complete o))
+
+# Define reglas para determinar si un jugador ha ganado en general
+(<= (win x)
+    (row-win x))
+(<= (win x)
+    (col-win x))
+(<= (win x)
+    (diagonal-win x))
+
+(<= (win o)
+    (row-win o))
+(<= (win o)
+    (col-win o))
+(<= (win o)
+    (diagonal-win o))
+
+# Define las condiciones de puntuación (score) para el jugador 'x' cuando el juego termina
+(<= (goal x 100)
+    (win x))
+
+(<= (goal o 0)
+    (win x))
+
+# Define las condiciones de puntuación (score) para el jugador 'o' cuando el juego termina
+(<= (goal o 100)
+    (win o))
+
+(<= (goal x 0)
+    (win o))
+
+# Define las condiciones de empate, cuando no hay ganador y el tablero está lleno
+(<= (goal x 50)
+    (not (win x))
+    (not (win o)))
