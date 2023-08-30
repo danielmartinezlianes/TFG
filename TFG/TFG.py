@@ -1,15 +1,31 @@
 import string
-
+import os
 def Main():
-    print('Introduce la ruta en la que se generara el archivo resultado: ')
-    f_salida= input()
-    CreaClases(f_salida)
-    print("Introduce la ruta del fichero a traducir: ")
-    f_entrada= input()
-    TraduceInstancias(f_salida,f_entrada)
-    TraduceHechos(f_salida,f_entrada)
-    TraduceReglas(f_salida,f_entrada)
-    print('El fichero se ha generado en la ruta '+f_salida)
+   try:
+      print('Introduce la ruta en la que se generara el archivo resultado: ')
+      f_salida= input()
+      ejem=os.path.isdir(f_salida)
+      ejem2= os.path.exists(f_salida)
+      if(not os.path.exists(f_salida) or not os.path.isdir(f_salida)):
+          print('La ruta introducida no es valida. Vuelve a intentarlo')
+          return
+   except:
+       print('No se ha podido acceder a la ruta debido a un error comprueba la ruta y vuelve a intentarlo.')
+       return
+   try:
+       print("Introduce la ruta del fichero a traducir: ")
+       f_entrada= input()
+       if(not os.path.exists(f_entrada) or not os.path.isfile(f_entrada)):
+          print('La ruta introducida no es valida. Vuelve a intentarlo.')
+          return
+   except:
+       print('No se ha podido acceder a la ruta debido a un error comprueba la ruta y vuelve a intentarlo.')
+       return
+   CreaClases(f_salida)
+   TraduceInstancias(f_salida,f_entrada)
+   TraduceHechos(f_salida,f_entrada)
+   TraduceReglas(f_salida,f_entrada)
+   print('El fichero se ha generado en la ruta '+f_salida)
 
 def CreaClases(f_salida):
     f = open(f_salida+"\\resultado.clp", "w")
@@ -21,15 +37,14 @@ def CreaClases(f_salida):
 (defclass turno
 	    (is-a USER)
 	    (slot Nombre (type SYMBOL))
-    )
-    """)
+    )\n""")
     f.close
 
 def TraduceInstancias(f_salida,f_entrada):
     with open( f_entrada, 'r') as file:
         f = open(f_salida+"\\resultado.clp", "a")
         line = file.readline()
-        f.write("(definstances estado-inicial \n");
+        f.write("\n(definstances estado-inicial \n");
         while line:
             
             word=str(line).split()
@@ -37,7 +52,7 @@ def TraduceInstancias(f_salida,f_entrada):
                 {
                     f.write("   (of turno (Nombre " + word[2].replace(')','')+"))\n")
                 }
-            if ('(role' in word ):
+            if ('(role' in word and '?' not in line):
                 {
                     f.write("   (of jugador (Nombre " + word[1].replace(')','')+"))\n")
                 }     
@@ -53,7 +68,7 @@ def TraduceHechos(f_salida,f_entrada):
         while line:
             
             word=str(line).split()
-            if ('(init' in word and '(control' not in word and len(word)>=5):
+            if ('(init' in word and '(control' not in word ):
                 f.write(line.replace('(init ','').replace(')','').replace('\n','')+")\n")
             line = file.readline();
         f.write(")");
@@ -125,8 +140,7 @@ def TraduceReglas(f_salida,f_entrada):
                     f.write("=>\n(assert "+word.replace('(<= (next','').replace(')','').replace('\n','')+")))\n")
                     acciones+=1
                     array.clear()
-                else:
-                    print("hola")
+                
 
             elif('(<=' in word and '(goal' not in word and 'terminal' not in word and '(legal' not in word):
                 fact=line
