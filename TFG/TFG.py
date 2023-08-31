@@ -106,36 +106,36 @@ def TraduceReglas(f_salida,f_entrada):
                     contador=len(array)-1
                     f.write("\n(defrule accion"+str(acciones)+"\n")
                     if(does==1):
-                        f.write("?d <- (object (is-a jugador) (Nombre "+array[1]+"))\n")
+                        f.write("?z <- (object (is-a jugador) (Nombre "+array[1]+"))\n")
                         while(contador>1):
                             word=str(array[contador]).split()
                             if('(not' not in word):
                                 word='?'+abecedario_minusculas[contador]+' <- '+str(array[contador])+''
-                                condiciones=condiciones+word.replace('(true ','').replace(')','').replace('\n','')+")\n"
+                                condiciones=word.replace('(true ','').replace(')','').replace('\n','')+")\n"
                                 f.write(condiciones.replace('(or',''))
                                 contador=contador-1
-                                line = file.readline();
+                                
                             else:
                                 word=str(array[contador])
-                                condiciones=condiciones+word.replace('(true ','').replace(')','').replace('\n','')+"))\n"
+                                condiciones=word.replace('(true ','').replace(')','').replace('\n','')+"))\n"
                                 f.write(condiciones.replace('(or',''))
                                 contador=contador-1
-                                line = file.readline();
+                                
                     else:
                         while(contador>=1):
                             word=str(array[contador]).split()
                             if('(not' not in word):
                                 word='?'+abecedario_minusculas[contador]+' <- '+str(array[contador])+''
-                                condiciones=condiciones+word.replace('(true ','').replace(')','').replace('\n','')+")\n"
+                                condiciones=word.replace('(true ','').replace(')','').replace('\n','')+")\n"
                                 f.write(condiciones.replace('(or',''))
                                 contador=contador-1
-                                line = file.readline();
+                                
                             else:
                                 word=str(array[contador])
-                                condiciones=condiciones+word.replace('(true ','').replace(')','').replace('\n','')+"))\n"
+                                condiciones=word.replace('(true ','').replace(')','').replace('\n','')+"))\n"
                                 f.write(condiciones.replace('(or',''))
                                 contador=contador-1
-                                line = file.readline();
+                                
                     word=str(array[0])
                     f.write("=>\n(assert "+word.replace('(<= (next','').replace(')','').replace('\n','')+")))\n")
                     acciones+=1
@@ -176,9 +176,9 @@ def TraduceReglas(f_salida,f_entrada):
                     word=str(line).split()
                     if('(not' not in word):
                         line='?a <- '+line+''
-                        f.write(line.replace(')','').replace('\n','')+")\n")
+                        f.write(line.replace(')','').replace('(true ','').replace('\n','')+")\n")
                     else:
-                        f.write(line.replace(')','').replace('\n','')+"))\n")
+                        f.write(line.replace(')','').replace('(true ','').replace('\n','')+"))\n")
                     line = file.readline();
                 f.write("=>\n(assert "+fact.replace('(<= ','')+"))\n")
             
