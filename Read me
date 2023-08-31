@@ -1,0 +1,3 @@
+Este proyecto contiene un traductor de GDL a CLIPS.
+EL funcionamiento es muy sencillo dando una ruta destino y la ruta al fichero que queremos traducir este programa genera un archivo resultado con las reglas y elementos del juego introducido.
+Este proyecto se ha desarrollado usando Python.
